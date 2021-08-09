@@ -18,6 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 public class OrderingCardDeliveryTest {
+
     public static String generator() {
         LocalDate startDate = LocalDate.now().plusDays(3);
         long start = startDate.getDayOfMonth();
@@ -26,6 +27,8 @@ public class OrderingCardDeliveryTest {
         long randomEpochDay = ThreadLocalRandom.current().longs(start, end).findAny().getAsLong();
         return startDate.plusDays(randomEpochDay).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
+    String data = generator();
+
     @BeforeEach
     void setUp() {
         open("http://localhost:9999");
@@ -34,14 +37,14 @@ public class OrderingCardDeliveryTest {
     @Test
     void theOrderOfCardMustBeSuccessfulDeliveryOfTheCardIsNotEarlierThanThreeDaysFromTheCurrentDate() {
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(generator());
+        $("[data-test-id=date] input").doubleClick().append(data);
         $("[data-test-id=name] input").setValue("Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
         $$("button").find(exactText("Забронировать")).click();
         $("[data-test-id=notification]").$(withText("Успешно!"))
                 .shouldHave(visible, Duration.ofSeconds(15));
-        $("[data-test-id=notification]").$(withText("Встреча успешно забронирована"))
+        $("[data-test-id=notification] .notification__content").shouldHave(exactText("Встреча успешно забронирована на " + data))
                 .shouldHave(visible, Duration.ofSeconds(15));
     }
 
@@ -49,14 +52,14 @@ public class OrderingCardDeliveryTest {
     void theCardOrderMustBeSuccessfulWithDoubleSurname() {
 
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(generator());
+        $("[data-test-id=date] input").doubleClick().append(data);
         $("[data-test-id=name] input").setValue("Иванов-Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
         $$("button").find(exactText("Забронировать")).click();
         $("[data-test-id=notification]").$(withText("Успешно!"))
                 .shouldHave(visible, Duration.ofSeconds(15));
-        $("[data-test-id=notification]").$(withText("Встреча успешно забронирована"))
+        $("[data-test-id=notification] .notification__content").shouldHave(exactText("Встреча успешно забронирована на " + data))
                 .shouldHave(visible, Duration.ofSeconds(15));
     }
 
@@ -64,43 +67,42 @@ public class OrderingCardDeliveryTest {
     void TheOrderOnTheCardMustBeSuccessfullyCompletedDeliveryInThirtyDays() {
 
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(generator());
+        $("[data-test-id=date] input").doubleClick().append(data);
         $("[data-test-id=name] input").setValue("Иванов-Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
         $$("button").find(exactText("Забронировать")).click();
         $("[data-test-id=notification]").$(withText("Успешно!"))
                 .shouldHave(visible, Duration.ofSeconds(15));
-        $("[data-test-id=notification]").$(withText("Встреча успешно забронирована"))
+        $("[data-test-id=notification] .notification__content").shouldHave(exactText("Встреча успешно забронирована на " + data))
                 .shouldHave(visible, Duration.ofSeconds(15));
     }
 
     @Test
     void TheOrderOnTheCardMustBeSuccessfullyDeliveredInMonth() {
-
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(generator());
+        $("[data-test-id=date] input").doubleClick().append(data);
         $("[data-test-id=name] input").setValue("Иванов-Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
         $$("button").find(exactText("Забронировать")).click();
         $("[data-test-id=notification]").$(withText("Успешно!"))
                 .shouldHave(visible, Duration.ofSeconds(15));
-        $("[data-test-id=notification]").$(withText("Встреча успешно забронирована"))
+        $("[data-test-id=notification] .notification__content").shouldHave(exactText("Встреча успешно забронирована на " + data))
                 .shouldHave(visible, Duration.ofSeconds(15));
     }
 
     @Test
     void TheOrderOnTheCardMustBeSuccessfullyDeliveredInYear() {
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(generator());
+        $("[data-test-id=date] input").doubleClick().append(data);
         $("[data-test-id=name] input").setValue("Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
         $$("button").find(exactText("Забронировать")).click();
         $("[data-test-id=notification]").$(withText("Успешно!"))
                 .shouldHave(visible, Duration.ofSeconds(15));
-        $("[data-test-id=notification]").$(withText("Встреча успешно забронирована"))
+        $("[data-test-id=notification] .notification__content").shouldHave(exactText("Встреча успешно забронирована на " + data))
                 .shouldHave(visible, Duration.ofSeconds(15));
     }
 
