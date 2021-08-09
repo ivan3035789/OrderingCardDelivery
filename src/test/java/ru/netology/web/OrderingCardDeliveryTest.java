@@ -14,14 +14,18 @@ import static java.time.LocalDate.now;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 public class OrderingCardDeliveryTest {
-    private final int day = 3;
-    private final int month = 1;
-    private final int year = 1;
-
-
+    public static String generator() {
+        LocalDate startDate = LocalDate.now().plusDays(3);
+        long start = startDate.getDayOfMonth();
+        LocalDate endDate = LocalDate.now().plusYears(1);
+        long end = endDate.lengthOfYear();
+        long randomEpochDay = ThreadLocalRandom.current().longs(start, end).findAny().getAsLong();
+        return startDate.plusDays(randomEpochDay).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+    }
     @BeforeEach
     void setUp() {
         open("http://localhost:9999");
@@ -29,9 +33,8 @@ public class OrderingCardDeliveryTest {
 
     @Test
     void theOrderOfCardMustBeSuccessfulDeliveryOfTheCardIsNotEarlierThanThreeDaysFromTheCurrentDate() {
-        String data = LocalDate.now().plusDays(day).format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(data);
+        $("[data-test-id=date] input").doubleClick().append(generator());
         $("[data-test-id=name] input").setValue("Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
@@ -44,9 +47,9 @@ public class OrderingCardDeliveryTest {
 
     @Test
     void theCardOrderMustBeSuccessfulWithDoubleSurname() {
-        String data = LocalDate.now().plusDays(day).format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
+
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(data);
+        $("[data-test-id=date] input").doubleClick().append(generator());
         $("[data-test-id=name] input").setValue("Иванов-Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
@@ -59,9 +62,9 @@ public class OrderingCardDeliveryTest {
 
     @Test
     void TheOrderOnTheCardMustBeSuccessfullyCompletedDeliveryInThirtyDays() {
-        String data = LocalDate.now().plusDays(30).format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
+
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(data);
+        $("[data-test-id=date] input").doubleClick().append(generator());
         $("[data-test-id=name] input").setValue("Иванов-Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
@@ -74,9 +77,9 @@ public class OrderingCardDeliveryTest {
 
     @Test
     void TheOrderOnTheCardMustBeSuccessfullyDeliveredInMonth() {
-        String data = LocalDate.now().plusMonths(month).format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
+
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(data);
+        $("[data-test-id=date] input").doubleClick().append(generator());
         $("[data-test-id=name] input").setValue("Иванов-Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
@@ -89,9 +92,8 @@ public class OrderingCardDeliveryTest {
 
     @Test
     void TheOrderOnTheCardMustBeSuccessfullyDeliveredInYear() {
-        String data = LocalDate.now().plusYears(year).format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(data);
+        $("[data-test-id=date] input").doubleClick().append(generator());
         $("[data-test-id=name] input").setValue("Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
@@ -104,9 +106,8 @@ public class OrderingCardDeliveryTest {
 
     @Test
     void itShouldDisplayRedWarninglabelWhenEnteringNonAdministrativeCity() {
-        String data = LocalDate.now().plusDays(day).format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
         $("[data-test-id=city] input").setValue("Чехов");
-        $("[data-test-id=date] input").doubleClick().append(data);
+        $("[data-test-id=date] input").doubleClick().append(generator());
         $("[data-test-id=name] input").setValue("Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
@@ -117,21 +118,20 @@ public class OrderingCardDeliveryTest {
 
     @Test
     void itShouldDisplayRedWarningLabelWhenEnteringDateEarlierThanThreeDaysFromTheCurrentDate() {
-        String data = LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(data);
+        $("[data-test-id=date] input").doubleClick().append(LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
         $("[data-test-id=name] input").setValue("Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
         $$("button").find(exactText("Забронировать")).click();
         $("[data-test-id=date] .input_theme_alfa-on-white.input_invalid .input__sub")
                 .shouldBe(exactText("Заказ на выбранную дату невозможен"));
+        // подправить завтра
     }
     @Test
     void itShouldDisplayRedWarningLabelWhenEnteringPhoneNumberWithoutThPlusSymbolInTheFirstPlace() {
-        String data = LocalDate.now().plusDays(day).format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(data);
+        $("[data-test-id=date] input").doubleClick().append(generator());
         $("[data-test-id=name] input").setValue("Иванов Иван");
         $("[data-test-id=phone] input").setValue("79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
@@ -142,9 +142,8 @@ public class OrderingCardDeliveryTest {
 
     @Test
     void itShouldDisplayRedWarningLabelWhenEnteringPhoneNumberWithNumberDigitsGreaterThanEleven() {
-        String data = LocalDate.now().plusDays(day).format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(data);
+        $("[data-test-id=date] input").doubleClick().append(generator());
         $("[data-test-id=name] input").setValue("Иванов Иван");
         $("[data-test-id=phone] input").setValue("+792509876541");
         $("[data-test-id=agreement] span.checkbox__box").click();
@@ -155,9 +154,8 @@ public class OrderingCardDeliveryTest {
 
     @Test
     void itShouldDisplayRedWarningLabelWhenEnteringAnInvalidCharacter() {
-        String data = LocalDate.now().plusDays(day).format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(data);
+        $("[data-test-id=date] input").doubleClick().append(generator());
         $("[data-test-id=name] input").setValue("Иванов_Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $("[data-test-id=agreement] span.checkbox__box").click();
@@ -167,9 +165,8 @@ public class OrderingCardDeliveryTest {
     }
     @Test
     void itShouldDisplayRedWarningLabelWhenTheConsentCheckMarkIsNotSet() {
-        String data = LocalDate.now().plusDays(day).format(DateTimeFormatter.ofPattern("dd.MM.YYYY"));
         $("[data-test-id=city] input").setValue("Москва");
-        $("[data-test-id=date] input").doubleClick().append(data);
+        $("[data-test-id=date] input").doubleClick().append(generator());
         $("[data-test-id=name] input").setValue("Иванов Иван");
         $("[data-test-id=phone] input").setValue("+79250987654");
         $$("button").find(exactText("Забронировать")).click();
